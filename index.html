@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bói Đồ Ăn - Food Fortune</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fce4ec;
+            --card-bg: #fffbf0;
+            --accent-gold: #d4af37;
+            --text-color: #5d4037;
+            --highlight: #ff80ab;
+            --shadow: 0 10px 30px rgba(93, 64, 55, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #fdfbf7;
+            /* Clean warm base */
+            /* Removed old linear gradient in favor of mesh blobs */
+
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            text-align: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        html,
+        body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+
+        .bg-shape {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            /* Massive blur for smooth gradient */
+            z-index: -1;
+            opacity: 0.8;
+            animation: moveShape 20s infinite alternate;
+        }
+
+        .shape-1 {
+            width: 500px;
+            height: 500px;
+            background: #ff9a9e;
+            top: -10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            background: #a18cd1;
+            bottom: 10%;
+            right: -5%;
+            animation-duration: 25s;
+        }
+
+        .shape-3 {
+            width: 300px;
+            height: 300px;
+            background: #fad0c4;
+            top: 40%;
+            left: 40%;
+            animation-duration: 18s;
+            animation-delay: -5s;
+        }
+
+        @keyframes moveShape {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(50px, 50px) rotate(20deg);
+            }
+        }
+
+
+        header {
+            margin-bottom: 2rem;
+            z-index: 10;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 3.5rem;
+            color: #fff;
+            text-shadow: 3px 3px 0px var(--highlight), 6px 6px 0px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0.5rem;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .stage {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 1200px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Card Container Styles */
+        .card-container {
+            width: 180px;
+            height: 280px;
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease;
+            transform-style: preserve-3d;
+            transform: translateX(0) scale(1);
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+            box-shadow: var(--shadow);
+            border-radius: 15px;
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            backface-visibility: hidden;
+            overflow: hidden;
+            border: 4px solid white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--card-bg);
+        }
+
+        .card-back {
+            background-image: url('assets/card-back.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Holographic sheen attempt */
+        .card-back::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.4) 50%, transparent 60%);
+            background-size: 200% 100%;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .card-container:hover .card-inner {
+            transform: translateY(-20px);
+            box-shadow: 0 25px 50px rgba(93, 64, 55, 0.3);
+        }
+
+        .card-container:hover .card-back::before {
+            opacity: 1;
+            animation: holoShift 1s infinite linear;
+        }
+
+        @keyframes holoShift {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .card-front {
+            transform: rotateY(180deg);
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Holo Sheen for Revealed Card (Front) */
+        .card-front::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(125deg,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0) 35%,
+                    rgba(255, 255, 255, 0.4) 45%,
+                    rgba(255, 255, 255, 0.8) 50%,
+                    rgba(255, 255, 255, 0.4) 55%,
+                    rgba(255, 255, 255, 0) 65%,
+                    rgba(255, 255, 255, 0) 100%);
+            z-index: 2;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            mix-blend-mode: screen;
+        }
+
+        .card-container.selected .card-front::after {
+            opacity: 1;
+            animation: holoSweep 2.5s infinite ease-in-out;
+        }
+
+        @keyframes holoSweep {
+            0% {
+                background-position: -250% 0;
+            }
+
+            100% {
+                background-position: 250% 0;
+            }
+        }
+
+        /* Selected State */
+        .stage.has-selection .card-container {
+            pointer-events: none;
+        }
+
+        .show-result .stage {
+            position: relative;
+            z-index: 160;
+            /* Above backdrop (150) */
+            pointer-events: none;
+            /* Let clicks pass to backdrop */
+        }
+
+        .show-result .card-container.selected {
+            pointer-events: auto;
+            /* Allow card interaction if any */
+        }
+
+        .stage.has-selection .card-container.selected {
+            z-index: 100;
+            transform: translate(0, 0) scale(1.5) rotate(0deg) !important;
+            /* Zoom to center on desktop */
+        }
+
+        /* Mobile Specifics - Deck View */
+
+        /* Controls */
+        .controls {
+            margin-top: 2rem;
+            z-index: 20;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-main {
+            background: linear-gradient(135deg, #ff80ab, #ff4081);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 64, 129, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-main:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-main:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .btn-main.hide {
+            display: none;
+        }
+
+        /* Result Panel */
+        /* Result Panel */
+        .result-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -40%) scale(0.9);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: rgba(255, 255, 255, 0.7);
+            /* Glass Desktop */
+            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(15px);
+            padding: 2rem;
+            border-radius: 30px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            width: 90%;
+            max-width: 400px;
+            z-index: 200;
+            transition-delay: 0s;
+            /* Reset delay on close */
+        }
+
+        .show-result .result-panel {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+            transition-delay: 0.6s;
+            /* Wait for card flip */
+        }
+
+        .show-result .controls {
+            display: none !important;
+        }
+
+        .result-title {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            color: var(--highlight);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-desc {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        /* Sparkles */
+        .sparkle {
+            position: absolute;
+            background: white;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: twinkle 1.5s infinite ease-in-out;
+            box-shadow: 0 0 10px white;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Mobile Responsive Polishing */
+        @media (max-width: 768px) {
+            header {
+                margin-bottom: 0.5rem;
+                transition: opacity 0.5s;
+            }
+
+            .show-result header {
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            p.subtitle {
+                font-size: 0.9rem;
+            }
+
+            .stage {
+                height: 400px;
+                width: 100%;
+                overflow: visible;
+                /* Let cards fly but body hides them */
+            }
+
+            .card-container {
+                width: 200px;
+                /* Slightly smaller to fit better */
+                height: 300px;
+            }
+
+            .card-container:hover .card-inner {
+                transform: none;
+                /* Disable hover lift on mobile */
+            }
+
+            /* Selected State on Mobile - Move UP MORE + Gap */
+            .stage.has-selection .card-container.selected {
+                transform: translate(0, -110px) scale(1.15) rotate(0deg) !important;
+                z-index: 300;
+            }
+
+            /* Drop others down */
+            .stage.has-selection .card-container:not(.selected) {
+                transform: translate(0, 150vh) !important;
+                /* Fly away */
+                opacity: 0;
+            }
+
+            /* Backdrop */
+            #backdrop {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.5s;
+                z-index: 150;
+                -webkit-backdrop-filter: blur(4px);
+                backdrop-filter: blur(4px);
+            }
+
+            .show-result #backdrop {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            /* Restore Result Panel Mobile Style */
+            .result-panel {
+                width: 90%;
+                bottom: 20px;
+                top: auto;
+                transform: translateX(-50%) translateY(20px);
+                padding: 1.2rem;
+                background: rgba(255, 255, 255, 0.65);
+                -webkit-backdrop-filter: blur(15px);
+                backdrop-filter: blur(15px);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                border-radius: 25px;
+                transition-delay: 0s !important;
+                /* Ensure no delay on hide */
+            }
+
+            .show-result .result-panel {
+                transform: translateX(-50%) translateY(0) scale(1);
+                transition-delay: 0.6s !important;
+            }
+        }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+            display: inline-block;
+            opacity: 0.7;
+        }
+
+        .skeleton-title {
+            height: 2.5rem;
+            width: 70%;
+            margin: 0 auto 0.5rem;
+        }
+
+        .skeleton-text {
+            height: 1.2rem;
+            width: 90%;
+            margin: 0.3rem auto;
+        }
+
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+
+
+    <header>
+        <h1>Bói Đồ Ăn</h1>
+        <p class="subtitle">Hôm nay ăn gì đây ta?</p>
+    </header>
+
+    <div class="stage" id="stage">
+        <!-- Cards injected by JS -->
+    </div>
+
+    <div class="controls" id="mobileControls">
+        <button class="btn-main" onclick="shuffleDeck()" id="btnShuffle">Xào Bài</button>
+    </div>
+
+    <!-- Backdrop for selection -->
+    <div id="backdrop" onclick="resetGame()"></div>
+
+    <div class="result-panel" id="resultPanel">
+        <h2 class="result-title" id="resultTitle">Title</h2>
+        <p class="result-desc" id="resultDesc">Description</p>
+        <button class="btn-main" onclick="resetGame()">Rút Bài Lại</button>
+    </div>
+
+    <script>
+        const cardsData = [
+            {
+                id: 'matcha',
+                name: 'Matcha Latte',
+                image: 'assets/card-matcha.png',
+                desc: 'Một chút đắng nhẹ, một chút ngọt ngào. Sự tỉnh táo và an yên sẽ đến với bạn hôm nay.'
+            },
+            {
+                id: 'boba',
+                name: 'Trà Sữa',
+                image: 'assets/card-boba.png',
+                desc: 'Ngọt ngào và gây nghiện. Một ly trà sữa full topping sẽ làm tan biến mọi âu lo.'
+            },
+            {
+                id: 'juice',
+                name: 'Nước Ép Trái Cây',
+                image: 'assets/card-juice.png',
+                desc: 'Tươi mát và tràn đầy vitamin! Đã đến lúc nạp năng lượng rực rỡ cho cơ thể rồi.'
+            },
+            {
+                id: 'fruitbowl',
+                name: 'Trái Cây Tô',
+                image: 'assets/card-fruitbowl.png',
+                desc: 'Sự kết hợp hoàn hảo của thiên nhiên. Ngọt ngào, thanh mát và đầy màu sắc - như cuộc sống của bạn sắp tới!'
+            },
+            {
+                id: 'peachtea',
+                name: 'Trà Đào',
+                image: 'assets/card-peachtea.png',
+                desc: 'Thơm lừng và giòn tan. Một lựa chọn "trendy" mang lại cảm giác sảng khoái tức thì.'
+            },
+            {
+                id: 'mango',
+                name: 'Xoài Lắc',
+                image: 'assets/card-mango.png',
+                desc: 'Chua cay mặn ngọt đủ vị! Một chút kích thích vị giác sẽ giúp bạn lấy lại cảm hứng.'
+            },
+            {
+                id: 'ricepaper',
+                name: 'Bánh Tráng Trộn',
+                image: 'assets/card-ricepaper.png',
+                desc: 'Món ăn vặt "quốc dân". Sự hỗn loạn ngon lành này chính là niềm vui giản đơn mà bạn cần ngay lúc này.'
+            },
+            {
+                id: 'salad',
+                name: 'Salad',
+                image: 'assets/card-salad.png',
+                desc: 'Thanh lọc cơ thể, nhẹ nhàng và healthy. Đôi khi sự đơn giản lại là đỉnh cao của hương vị.'
+            }
+        ];
+
+        const stage = document.getElementById('stage');
+        const resultPanel = document.getElementById('resultPanel');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultDesc = document.getElementById('resultDesc');
+        const btnShuffle = document.getElementById('btnShuffle');
+        const mobileControls = document.getElementById('mobileControls');
+
+        let isMobile = window.innerWidth <= 768;
+        let isShuffling = false;
+
+        function initGame() {
+            stage.classList.remove('has-selection');
+
+            // Only show shuffle button on mobile
+            if (isMobile) {
+                mobileControls.style.display = 'flex';
+                btnShuffle.style.display = 'block';
+                btnShuffle.innerText = "Xào Bài";
+            } else {
+                mobileControls.style.display = 'none';
+            }
+
+            // Shuffle data first
+            const shuffled = [...cardsData].sort(() => 0.5 - Math.random());
+
+            const total = shuffled.length;
+            const center = (total - 1) / 2;
+
+            // Check if we need to create cards or just update them
+            const existingCards = Array.from(stage.querySelectorAll('.card-container'));
+            const needsCreation = existingCards.length !== total;
+
+            if (needsCreation) stage.innerHTML = '';
+
+            shuffled.forEach((cardData, index) => {
+                let card;
+
+                if (needsCreation) {
+                    card = document.createElement('div');
+                    card.className = 'card-container';
+                    card.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-back"></div>
+                            <div class="card-front"></div>
+                        </div>
+                    `;
+                    // Click logic
+                    card.addEventListener('click', () => {
+                        // Desktop
+                        if (!isMobile) revealCard(card, card.dataset.json ? JSON.parse(card.dataset.json) : cardData);
+                        // Mobile
+                        else {
+                            if (stage.classList.contains('has-selection')) return;
+                            revealCard(card, card.dataset.json ? JSON.parse(card.dataset.json) : cardData);
+                        }
+                    });
+
+                    stage.appendChild(card);
+                } else {
+                    card = existingCards[index];
+                    // Reset state
+                    card.classList.remove('selected');
+                    card.querySelector('.card-inner').style.transform = 'rotateY(0deg)';
+                }
+
+                // Update Data
+                card.dataset.name = cardData.name;
+                card.dataset.json = JSON.stringify(cardData);
+                card.querySelector('.card-front').style.backgroundImage = `url('${cardData.image}')`;
+
+                // Update Position
+                if (!isMobile) {
+                    // Desktop: Fan Effect
+                    const offset = index - center;
+                    const x = offset * 60;
+                    const rotate = offset * 5;
+                    const y = Math.abs(offset) * 10;
+                    card.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${rotate}deg)`;
+                } else {
+                    // Mobile: Deck Stack
+                    const randomRot = (Math.random() - 0.5) * 10;
+                    card.style.transform = `translate(0, 0) rotate(${randomRot}deg)`;
+                }
+            });
+
+            if (!document.querySelector('.sparkle')) createSparkles();
+        }
+
+        function shuffleDeck() {
+            if (isShuffling) return;
+            isShuffling = true;
+            btnShuffle.innerText = "Đang xào...";
+
+            const cards = document.querySelectorAll('.card-container');
+
+            // Scatter animation
+            const screenW = window.innerWidth;
+
+            cards.forEach((card, i) => {
+                // Random scatter positions
+                // Constrain to screen width for mobile safer scatter
+                const maxSpread = isMobile ? Math.min(150, screenW / 2 - 60) : 200;
+
+                const rx = (Math.random() - 0.5) * maxSpread * 2;
+                const ry = (Math.random() - 0.5) * (isMobile ? 100 : 200);
+                const rr = (Math.random() - 0.5) * 360;
+
+                card.style.transition = 'transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+                card.style.transform = `translate(${rx}px, ${ry}px) rotate(${rr}deg)`;
+            });
+
+            if (isMobile && navigator.vibrate) navigator.vibrate(50); // Tick
+
+            // Regroup
+            setTimeout(() => {
+                cards.forEach((card, i) => {
+                    const randomRot = (Math.random() - 0.5) * 10;
+                    card.style.transform = `translate(0, 0) rotate(${randomRot}deg)`;
+                });
+
+                setTimeout(() => {
+                    isShuffling = false;
+                    btnShuffle.innerText = "Rút bài đi!";
+                    // Add a pulse effect to the deck?
+                }, 500);
+
+            }, 600);
+        }
+
+        function revealCard(cardElement, data) {
+            if (stage.classList.contains('has-selection')) return;
+            if (isShuffling) return;
+
+            stage.classList.add('has-selection');
+            document.body.classList.add('show-result');
+            cardElement.classList.add('selected');
+
+            // Mobile controls hidden via CSS .show-result .controls
+
+            // Desktop: centering logic handled by CSS classes .selected
+            // But we need to update CSS to support the transition correctly
+            // The existing CSS for .selected handles it via translate(0,0) scale(1.3)
+            // But on mobile we want it centered on screen.
+
+            // Wait for flip
+            setTimeout(() => {
+                cardElement.querySelector('.card-inner').style.transform = 'rotateY(180deg)';
+                confettiEffect();
+                if (isMobile && navigator.vibrate) navigator.vibrate([100, 50, 100]); // Success pattern
+            }, 600);
+
+            setTimeout(() => {
+                resultTitle.innerText = data.name;
+                resultDesc.innerText = data.desc;
+            }, 800);
+        }
+
+        function resetGame() {
+            // Flip back
+            const selected = document.querySelector('.card-container.selected');
+            if (selected) {
+                selected.querySelector('.card-inner').style.transform = 'rotateY(0deg)';
+                selected.classList.remove('selected');
+            }
+
+            if (selected) {
+                selected.querySelector('.card-inner').style.transform = 'rotateY(0deg)';
+                selected.classList.remove('selected');
+            }
+
+            stage.classList.remove('has-selection');
+            document.body.classList.remove('show-result');
+
+            setTimeout(() => {
+                initGame();
+                // Show Skeleton Loading to prevent layout shift
+                resultTitle.innerHTML = '<div class="skeleton skeleton-title"></div>';
+                resultDesc.innerHTML = '<div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text" style="width: 60%"></div>';
+            }, 600);
+        }
+
+        function createSparkles() {
+            const oldSparkles = document.querySelectorAll('.sparkle');
+            oldSparkles.forEach(s => s.remove());
+
+            for (let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.top = Math.random() * 100 + 'vh';
+                sparkle.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(sparkle);
+            }
+        }
+
+        function confettiEffect() {
+            // Simple confetti colors
+            const colors = ['#ff80ab', '#d4af37', '#ffffff', '#69f0ae', '#40c4ff'];
+
+            for (let i = 0; i < 50; i++) {
+                const conf = document.createElement('div');
+                conf.style.position = 'fixed';
+                conf.style.width = Math.random() * 10 + 5 + 'px';
+                conf.style.height = Math.random() * 5 + 5 + 'px';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.top = '50%';
+                conf.style.left = '50%';
+                conf.style.zIndex = 400;
+                document.body.appendChild(conf);
+
+                // Explode out
+                const angle = Math.random() * Math.PI * 2;
+                const dist = Math.random() * 300 + 50;
+                const dx = Math.cos(angle) * dist;
+                const dy = Math.sin(angle) * dist;
+
+                // Animate
+                const anim = conf.animate([
+                    { transform: 'translate(0,0) rotate(0)', opacity: 1 },
+                    { transform: `translate(${dx}px, ${dy}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], {
+                    duration: 1000 + Math.random() * 1000,
+                    easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
+                });
+
+                anim.onfinish = () => conf.remove();
+            }
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            const newIsMobile = window.innerWidth <= 768;
+            if (newIsMobile !== isMobile) {
+                isMobile = newIsMobile;
+                initGame();
+            }
+        });
+
+        initGame();
+
+    </script>
+</body>
+
+</html>
