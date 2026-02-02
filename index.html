@@ -423,11 +423,28 @@
             }
 
             h1 {
-                font-size: 2.2rem;
+                font-size: 2rem;
             }
 
             p.subtitle {
                 font-size: 0.9rem;
+            }
+
+            .result-title {
+                font-size: 1.8rem;
+            }
+
+            .result-desc {
+                font-size: 1rem;
+            }
+
+            .name-input {
+                font-size: 1.1rem;
+            }
+
+            .btn-main {
+                font-size: 1rem;
+                padding: 0.8rem 2rem;
             }
 
             .stage {
@@ -504,6 +521,21 @@
             .show-result .result-panel {
                 transform: translateX(-50%) translateY(0) scale(1);
                 transition-delay: 0.6s !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .result-title {
+                font-size: 1.5rem;
+            }
+
+            .card-container {
+                width: 42vw;
+                height: 60vw;
             }
         }
 
