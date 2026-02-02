@@ -431,16 +431,18 @@
             }
 
             .stage {
-                height: 400px;
+                height: 45vh;
+                min-height: 400px;
                 width: 100%;
                 overflow: visible;
                 /* Let cards fly but body hides them */
             }
 
             .card-container {
-                width: 200px;
-                /* Slightly smaller to fit better */
-                height: 300px;
+                width: 45vw;
+                max-width: 180px;
+                height: 65vw;
+                max-height: 260px;
             }
 
             .card-container:hover .card-inner {
@@ -450,7 +452,7 @@
 
             /* Selected State on Mobile - Move UP MORE + Gap */
             .stage.has-selection .card-container.selected {
-                transform: translate(0, -200px) scale(1.2) rotate(0deg) !important;
+                transform: translate(0, -25vh) scale(1.1) rotate(0deg) !important;
                 z-index: 300;
             }
 
@@ -554,7 +556,8 @@
             font-size: 1.3rem;
             text-align: center;
             padding: 0.5rem 1rem;
-            width: 260px;
+            width: 80%;
+            max-width: 260px;
             outline: none;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
@@ -562,7 +565,8 @@
 
         .name-input:focus {
             border-bottom-color: #fff;
-            width: 300px;
+            width: 90%;
+            max-width: 300px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
         }
@@ -590,7 +594,7 @@
         <h1>Góc Tiên Tri</h1>
         <p class="subtitle">Vũ trụ muốn nhắn gửi điều gì?</p>
         <div class="name-input-container">
-            <input type="text" id="nameInput" class="name-input" placeholder="Nhập tên của bạn..." autocomplete="off">
+            <input type="text" id="nameInput" class="name-input" placeholder="Gõ tên em vào đây..." autocomplete="off">
         </div>
     </header>
 
@@ -709,7 +713,7 @@
                 id: 'matcha',
                 name: 'Matcha Latte',
                 image: 'assets/card-matcha.png',
-                desc: 'Một chút đắng nhẹ, một chút ngọt ngào. Sự tỉnh táo và an yên sẽ đến với bạn hôm nay.',
+                desc: 'Một chút đắng nhẹ, một chút ngọt ngào. Sự tỉnh táo và an yên sẽ đến với em hôm nay.',
                 emojis: ['🍵', '🌿', '💚', '✨']
             },
             {
@@ -730,7 +734,7 @@
                 id: 'fruitbowl',
                 name: 'Trái Cây Tô',
                 image: 'assets/card-fruitbowl.png',
-                desc: 'Sự kết hợp hoàn hảo của thiên nhiên. Ngọt ngào, thanh mát và đầy màu sắc - như cuộc sống của bạn sắp tới!',
+                desc: 'Sự kết hợp hoàn hảo của thiên nhiên. Ngọt ngào, thanh mát và đầy màu sắc - như cuộc sống của em sắp tới!',
                 emojis: ['🍓', '🥝', '🫐', '🍉']
             },
             {
@@ -744,14 +748,14 @@
                 id: 'mango',
                 name: 'Xoài Lắc',
                 image: 'assets/card-mango.png',
-                desc: 'Chua cay mặn ngọt đủ vị! Một chút kích thích vị giác sẽ giúp bạn lấy lại cảm hứng.',
+                desc: 'Chua cay mặn ngọt đủ vị! Một chút kích thích vị giác sẽ giúp em lấy lại cảm hứng.',
                 emojis: ['🥭', '🌶️', '🧂', '🔥']
             },
             {
                 id: 'ricepaper',
                 name: 'Bánh Tráng Trộn',
                 image: 'assets/card-ricepaper.png',
-                desc: 'Món ăn vặt "quốc dân". Sự hỗn loạn ngon lành này chính là niềm vui giản đơn mà bạn cần ngay lúc này.',
+                desc: 'Món ăn vặt "quốc dân". Sự hỗn loạn ngon lành này chính là niềm vui giản đơn mà em cần ngay lúc này.',
                 emojis: ['🌯', '🥚', '🐂', '🥜']
             },
 
@@ -930,7 +934,7 @@
                 const name = nameInput.value.trim();
 
                 if (name) {
-                    resultTitle.innerHTML = `<span style="font-size: 0.7em; display: block; margin-bottom: 0.2em; color: #777;">${name} nên ăn...</span> ${data.name}`;
+                    resultTitle.innerHTML = `<span style="font-family: 'Quicksand', sans-serif; font-size: 0.5em; display: block; margin-bottom: 0.5rem; color: var(--text-color); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; opacity: 0.7;">Lời nhắn gửi đến ${name}</span> ${data.name}`;
                 } else {
                     resultTitle.innerText = data.name;
                 }
