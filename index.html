@@ -450,7 +450,7 @@
 
             /* Selected State on Mobile - Move UP MORE + Gap */
             .stage.has-selection .card-container.selected {
-                transform: translate(0, -110px) scale(1.15) rotate(0deg) !important;
+                transform: translate(0, -200px) scale(1.2) rotate(0deg) !important;
                 z-index: 300;
             }
 
@@ -536,6 +536,47 @@
                 background-position: -200% 0;
             }
         }
+
+        /* Name Input Styles */
+        .name-input-container {
+            margin-top: 1.5rem;
+            position: relative;
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+
+        .name-input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.3rem;
+            text-align: center;
+            padding: 0.5rem 1rem;
+            width: 260px;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .name-input:focus {
+            border-bottom-color: #fff;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .name-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+        }
+
+        /* Hidden layout specific */
+        .show-result .name-input-container {
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -548,6 +589,9 @@
     <header>
         <h1>Bói Đồ Ăn</h1>
         <p class="subtitle">Hôm nay ăn gì đây ta?</p>
+        <div class="name-input-container">
+            <input type="text" id="nameInput" class="name-input" placeholder="Nhập tên của bạn..." autocomplete="off">
+        </div>
     </header>
 
     <div class="stage" id="stage">
@@ -568,54 +612,154 @@
     </div>
 
     <script>
+        // Sound Manager
+        const SoundManager = {
+            ctx: null,
+            init: function () {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+            playTone: function (freq, type, duration, vol = 0.1) {
+                if (!this.ctx) this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+            playShuffle: function () {
+                // Rapid noise/ticks
+                if (!this.ctx) this.init();
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        this.playTone(100 + Math.random() * 200, 'square', 0.05, 0.05);
+                    }, i * 30);
+                }
+            },
+            playFlip: function () {
+                if (!this.ctx) this.init();
+                this.playTone(400, 'sine', 0.1, 0.1);
+            },
+            playReveal: function () {
+                if (!this.ctx) this.init();
+                // Major chord arpeggio
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    setTimeout(() => {
+                        this.playTone(freq, 'triangle', 0.6, 0.1);
+                    }, i * 100);
+                });
+            }
+        };
+
+        // Initialize Audio on first interaction
+        document.body.addEventListener('click', () => SoundManager.init(), { once: true });
+        document.body.addEventListener('touchstart', () => SoundManager.init(), { once: true });
+
+        // Shake Detection
+        let lastX, lastY, lastZ;
+        let lastTime = 0;
+        const SHAKE_THRESHOLD = 15;
+
+        function initShake() {
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', (e) => {
+                    const current = e.accelerationIncludingGravity;
+                    if (!current) return;
+
+                    const currentTime = new Date().getTime();
+                    // debounce
+                    if ((currentTime - lastTime) > 100) {
+                        const diffTime = currentTime - lastTime;
+                        lastTime = currentTime;
+
+                        const speed = Math.abs(current.x + current.y + current.z - lastX - lastY - lastZ) / diffTime * 10000;
+
+                        if (speed > SHAKE_THRESHOLD * 100) { // Simple speed check
+                            // Check if not already shuffling and no result shown
+                            if (!isShuffling && !document.body.classList.contains('show-result')) {
+                                shuffleDeck();
+                            }
+                        }
+
+                        lastX = current.x;
+                        lastY = current.y;
+                        lastZ = current.z;
+                    }
+                });
+            }
+        }
+
         const cardsData = [
             {
                 id: 'matcha',
                 name: 'Matcha Latte',
                 image: 'assets/card-matcha.png',
-                desc: 'Một chút đắng nhẹ, một chút ngọt ngào. Sự tỉnh táo và an yên sẽ đến với bạn hôm nay.'
+                desc: 'Một chút đắng nhẹ, một chút ngọt ngào. Sự tỉnh táo và an yên sẽ đến với bạn hôm nay.',
+                emojis: ['🍵', '🌿', '💚', '✨']
             },
             {
                 id: 'boba',
                 name: 'Trà Sữa',
                 image: 'assets/card-boba.png',
-                desc: 'Ngọt ngào và gây nghiện. Một ly trà sữa full topping sẽ làm tan biến mọi âu lo.'
+                desc: 'Ngọt ngào và gây nghiện. Một ly trà sữa full topping sẽ làm tan biến mọi âu lo.',
+                emojis: ['🧋', '🍬', '✨', '🥛']
             },
             {
                 id: 'juice',
                 name: 'Nước Ép Trái Cây',
                 image: 'assets/card-juice.png',
-                desc: 'Tươi mát và tràn đầy vitamin! Đã đến lúc nạp năng lượng rực rỡ cho cơ thể rồi.'
+                desc: 'Tươi mát và tràn đầy vitamin! Đã đến lúc nạp năng lượng rực rỡ cho cơ thể rồi.',
+                emojis: ['🍊', '🍎', '🥕', '🥤']
             },
             {
                 id: 'fruitbowl',
                 name: 'Trái Cây Tô',
                 image: 'assets/card-fruitbowl.png',
-                desc: 'Sự kết hợp hoàn hảo của thiên nhiên. Ngọt ngào, thanh mát và đầy màu sắc - như cuộc sống của bạn sắp tới!'
+                desc: 'Sự kết hợp hoàn hảo của thiên nhiên. Ngọt ngào, thanh mát và đầy màu sắc - như cuộc sống của bạn sắp tới!',
+                emojis: ['🍓', '🥝', '🫐', '🍉']
             },
             {
                 id: 'peachtea',
                 name: 'Trà Đào',
                 image: 'assets/card-peachtea.png',
-                desc: 'Thơm lừng và giòn tan. Một lựa chọn "trendy" mang lại cảm giác sảng khoái tức thì.'
+                desc: 'Thơm lừng và giòn tan. Một lựa chọn "trendy" mang lại cảm giác sảng khoái tức thì.',
+                emojis: ['🍑', '🍵', '✨', '🧊']
             },
             {
                 id: 'mango',
                 name: 'Xoài Lắc',
                 image: 'assets/card-mango.png',
-                desc: 'Chua cay mặn ngọt đủ vị! Một chút kích thích vị giác sẽ giúp bạn lấy lại cảm hứng.'
+                desc: 'Chua cay mặn ngọt đủ vị! Một chút kích thích vị giác sẽ giúp bạn lấy lại cảm hứng.',
+                emojis: ['🥭', '🌶️', '🧂', '🔥']
             },
             {
                 id: 'ricepaper',
                 name: 'Bánh Tráng Trộn',
                 image: 'assets/card-ricepaper.png',
-                desc: 'Món ăn vặt "quốc dân". Sự hỗn loạn ngon lành này chính là niềm vui giản đơn mà bạn cần ngay lúc này.'
+                desc: 'Món ăn vặt "quốc dân". Sự hỗn loạn ngon lành này chính là niềm vui giản đơn mà bạn cần ngay lúc này.',
+                emojis: ['🌯', '🥚', '🐂', '🥜']
             },
             {
                 id: 'salad',
                 name: 'Salad',
                 image: 'assets/card-salad.png',
-                desc: 'Thanh lọc cơ thể, nhẹ nhàng và healthy. Đôi khi sự đơn giản lại là đỉnh cao của hương vị.'
+                desc: 'Thanh lọc cơ thể, nhẹ nhàng và healthy. Đôi khi sự đơn giản lại là đỉnh cao của hương vị.',
+                emojis: ['🥗', '🥬', '🍅', '🥒']
             }
         ];
 
@@ -705,12 +849,30 @@
             });
 
             if (!document.querySelector('.sparkle')) createSparkles();
+
+            // Init shake listener if not already
+            if (isMobile) initShake();
         }
 
         function shuffleDeck() {
             if (isShuffling) return;
+
+            // iOS Permission Request Interception
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function' && !window.shakePermissionGranted) {
+                DeviceMotionEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            window.shakePermissionGranted = true;
+                            initShake();
+                        }
+                    })
+                    .catch(console.error);
+            }
+
             isShuffling = true;
             btnShuffle.innerText = "Đang xào...";
+
+            SoundManager.playShuffle();
 
             const cards = document.querySelectorAll('.card-container');
 
@@ -730,7 +892,10 @@
                 card.style.transform = `translate(${rx}px, ${ry}px) rotate(${rr}deg)`;
             });
 
-            if (isMobile && navigator.vibrate) navigator.vibrate(50); // Tick
+            // Rhythmic vibration: tick tick tick
+            if (isMobile && navigator.vibrate) {
+                navigator.vibrate([30, 50, 30, 50, 30]);
+            }
 
             // Regroup
             setTimeout(() => {
@@ -742,7 +907,7 @@
                 setTimeout(() => {
                     isShuffling = false;
                     btnShuffle.innerText = "Rút bài đi!";
-                    // Add a pulse effect to the deck?
+                    if (isMobile && navigator.vibrate) navigator.vibrate(50); // Heavy thud
                 }, 500);
 
             }, 600);
@@ -752,26 +917,30 @@
             if (stage.classList.contains('has-selection')) return;
             if (isShuffling) return;
 
+            SoundManager.playFlip();
+
             stage.classList.add('has-selection');
             document.body.classList.add('show-result');
             cardElement.classList.add('selected');
 
-            // Mobile controls hidden via CSS .show-result .controls
-
-            // Desktop: centering logic handled by CSS classes .selected
-            // But we need to update CSS to support the transition correctly
-            // The existing CSS for .selected handles it via translate(0,0) scale(1.3)
-            // But on mobile we want it centered on screen.
-
             // Wait for flip
             setTimeout(() => {
                 cardElement.querySelector('.card-inner').style.transform = 'rotateY(180deg)';
-                confettiEffect();
-                if (isMobile && navigator.vibrate) navigator.vibrate([100, 50, 100]); // Success pattern
+                SoundManager.playReveal();
+                confettiEffect(data);
+                if (isMobile && navigator.vibrate) navigator.vibrate([100, 50, 100]); // Success pattern ta-da!
             }, 600);
 
             setTimeout(() => {
-                resultTitle.innerText = data.name;
+                const nameInput = document.getElementById('nameInput');
+                const name = nameInput.value.trim();
+
+                if (name) {
+                    resultTitle.innerHTML = `<span style="font-size: 0.7em; display: block; margin-bottom: 0.2em; color: #777;">${name} nên ăn...</span> ${data.name}`;
+                } else {
+                    resultTitle.innerText = data.name;
+                }
+
                 resultDesc.innerText = data.desc;
             }, 800);
         }
@@ -814,19 +983,27 @@
             }
         }
 
-        function confettiEffect() {
-            // Simple confetti colors
+        function confettiEffect(cardData) {
+            // Use specific emojis if available, else standard colors
+            const emojis = cardData && cardData.emojis ? cardData.emojis : null;
             const colors = ['#ff80ab', '#d4af37', '#ffffff', '#69f0ae', '#40c4ff'];
 
             for (let i = 0; i < 50; i++) {
                 const conf = document.createElement('div');
                 conf.style.position = 'fixed';
-                conf.style.width = Math.random() * 10 + 5 + 'px';
-                conf.style.height = Math.random() * 5 + 5 + 'px';
-                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.zIndex = 400;
                 conf.style.top = '50%';
                 conf.style.left = '50%';
-                conf.style.zIndex = 400;
+
+                if (emojis) {
+                    conf.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                    conf.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                } else {
+                    conf.style.width = Math.random() * 10 + 5 + 'px';
+                    conf.style.height = Math.random() * 5 + 5 + 'px';
+                    conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                }
+
                 document.body.appendChild(conf);
 
                 // Explode out
@@ -837,8 +1014,8 @@
 
                 // Animate
                 const anim = conf.animate([
-                    { transform: 'translate(0,0) rotate(0)', opacity: 1 },
-                    { transform: `translate(${dx}px, ${dy}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                    { transform: 'translate(0,0) rotate(0) scale(0.5)', opacity: 1 },
+                    { transform: `translate(${dx}px, ${dy}px) rotate(${Math.random() * 720}deg) scale(1)`, opacity: 0 }
                 ], {
                     duration: 1000 + Math.random() * 1000,
                     easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
